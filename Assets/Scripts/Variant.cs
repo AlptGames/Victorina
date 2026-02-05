@@ -1,83 +1,97 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Variant : MonoBehaviour
 {
     public static int rightAnswers = 0;
     public static int falseAnswers = 0;
 
-    public GameObject gOrK;
+    public static int levelsCounting;
+    public TMP_Text levelsCount;
 
+    public GameObject gOrK;
     public AudioSource click;
 
     public RectTransform levels;
-    public float shiftAmount = 800f;
-    public float duration = 1f;
+    [Header("Настройки времени")]
+    public float waitBeforeMove = 0.5f; // Сколько gOrK висит перед движением
+    public float duration = 1f;         // Длительность самого движения
+    
     public AnimationCurve easingCurve; 
 
     private bool isMoving = false;
 
     void Start()
     {
-        rightAnswers = PlayerPrefs.GetInt("RightAnswers");
-        rightAnswers = PlayerPrefs.GetInt("RightAnswers");
+        // Подгружаем статистику (второй аргумент 0 — значение по умолчанию)
+        rightAnswers = PlayerPrefs.GetInt("RightAnswers", 0);
+        falseAnswers = PlayerPrefs.GetInt("FalseAnswers", 0);
+        levelsCounting = PlayerPrefs.GetInt("LevelsCount", 0);
+        levelsCount.text = levelsCounting + "/100";
     
-        // Загружаем сохраненную позицию X (по умолчанию 0)
         float savedX = PlayerPrefs.GetFloat("LevelsPosX", 0);
         levels.anchoredPosition = new Vector2(savedX, levels.anchoredPosition.y);
     }
 
     public void RightAnswer()
     {
-        if (isMoving || levels == null) return;
-        click.Play();
-
+        if (isMoving) return;
         rightAnswers++;
+        levelsCounting++;
         PlayerPrefs.SetInt("RightAnswers", rightAnswers);
-        gOrK.SetActive(true);
-        Debug.Log(rightAnswers);
-        Vector2 startPos = levels.anchoredPosition;
-        Vector2 targetPos = startPos + new Vector2(-shiftAmount, 0);
-        StartCoroutine(SmoothMove(startPos, targetPos));
+        PlayerPrefs.SetInt("LevelsCount", levelsCounting);
+        levelsCount.text = levelsCounting + "/100";
+        StartCoroutine(ProcessAnswer());
     }
 
     public void FalseAnswer()
     {
-        if (isMoving || levels == null) return;
-        click.Play();
-
+        if (isMoving) return;
         falseAnswers++;
-        PlayerPrefs.SetInt("FalseAnswers", falseAnswers);
-        Debug.Log(falseAnswers);
-        Vector2 startPos = levels.anchoredPosition;
-        Vector2 targetPos = startPos + new Vector2(-shiftAmount, 0);
-        StartCoroutine(SmoothMove(startPos, targetPos));
+        levelsCounting++;
+        PlayerPrefs.SetInt("LevelsCount", levelsCounting);
+        levelsCount.text = levelsCounting + "/100";
+        StartCoroutine(ProcessAnswer());
     }
 
-    IEnumerator SmoothMove(Vector2 start, Vector2 target)
+    IEnumerator ProcessAnswer()
     {
         isMoving = true;
-        float elapsed = 0;
+        click.Play();
 
+        // 1. Сразу активируем gOrK (до ожидания и до движения)
+        if (gOrK != null) gOrK.SetActive(true);
+
+        // 2. Ждем заданное время, пока игрок видит gOrK
+        yield return new WaitForSeconds(waitBeforeMove);
+
+        // 3. Вычисляем ширину экрана и целевую позицию
+        float screenWidth = levels.parent.GetComponent<RectTransform>().rect.width;
+        Vector2 startPos = levels.anchoredPosition;
+        Vector2 targetPos = startPos + new Vector2(-screenWidth, 0);
+
+        // 4. Плавное движение
+        float elapsed = 0;
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-
-            // Формула SmoothStep для "живой" анимации
-            // Она делает движение медленным в начале и в конце, и быстрым в середине
+            float t = Mathf.Clamp01(elapsed / duration);
             float curveValue = easingCurve.Evaluate(t);
 
-            levels.anchoredPosition = Vector2.Lerp(start, target, curveValue);
+            levels.anchoredPosition = Vector2.Lerp(startPos, targetPos, curveValue);
             yield return null;
         }
 
-        levels.anchoredPosition = target;
+        levels.anchoredPosition = targetPos;
 
-        PlayerPrefs.SetFloat("LevelsPosX", target.x);
+        // 5. Сохранение позиции
+        PlayerPrefs.SetFloat("LevelsPosX", targetPos.x);
         PlayerPrefs.Save(); 
 
         isMoving = false;
+        
+        // Опционально: можно выключать gOrK здесь, если он должен исчезнуть после движения
+        // gOrK.SetActive(false);
     }
 }
