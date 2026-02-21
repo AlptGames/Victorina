@@ -15,19 +15,19 @@ public class Volume : MonoBehaviour
     public float sfxVolume;
     public TMP_Text sfxSliderText;
 
-    public Slider masterSlider;
-    public float masterVolume;
-    public TMP_Text masterSliderText;
+    //public Slider masterSlider;
+    //public float masterVolume;
+    //public TMP_Text masterSliderText;
 
     public Image musicSound;
     public Image sfxSound;
-    public Image masterSound;
+    //public Image masterSound;
 
     public Sprite soundOn;
     public Sprite soundOff;
     public bool onSoundMusic;
     public bool onSoundSFX;
-    public bool onSoundMaster;
+   // public bool onSoundMaster;
     // Start ◊“Œ “€ ƒﬁ≈≈≈≈≈À¿›››ÿ
     void Start()
     {
@@ -58,7 +58,7 @@ public class Volume : MonoBehaviour
             sfxSlider.value = -20;
             Mixer.SetFloat("SFX", -20);
         }
-        if (PlayerPrefs.HasKey("Master")) 
+        /*if (PlayerPrefs.HasKey("Master")) 
         {
             if (masterSlider != null)
             {
@@ -71,6 +71,7 @@ public class Volume : MonoBehaviour
             masterSlider.value = -20;
             Mixer.SetFloat("Master", -20);
         }
+        */
     }
 
     void Update()
@@ -95,7 +96,7 @@ public class Volume : MonoBehaviour
             onSoundSFX = true;
             sfxSound.sprite = soundOn;
         }
-        if (masterSlider.value == -80)
+        /*if (masterSlider.value == -80)
         {
             masterSound.sprite = soundOff;
             onSoundMaster = false;
@@ -105,6 +106,7 @@ public class Volume : MonoBehaviour
             onSoundMaster = true;
             masterSound.sprite = soundOn;
         }
+        */
     }
 
     public void SetMusicVolume()
@@ -123,14 +125,14 @@ public class Volume : MonoBehaviour
         PlayerPrefs.SetFloat("SFX", sfxVolume);
     }
 
-    public void SetMasterVolume()
+    /*public void SetMasterVolume()
     {
         masterVolume = masterSlider.value;
         masterSliderText.text = "Œ·˘ËÈ: " + (int)(masterSlider.value + 80);
         Mixer.SetFloat("Master", masterVolume);
         PlayerPrefs.SetFloat("Master", masterVolume);
     }
-
+    */
     public void OnOffSoundMusic()
     {
         if (onSoundMusic == false)
@@ -158,7 +160,7 @@ public class Volume : MonoBehaviour
         }
     }
 
-    public void OnOffSoundMaster()
+    /*public void OnOffSoundMaster()
     {
         if (onSoundMaster == false)
         {
@@ -171,4 +173,5 @@ public class Volume : MonoBehaviour
             onSoundMaster = false;
         }
     }
+    */
 }
