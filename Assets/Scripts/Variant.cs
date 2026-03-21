@@ -24,6 +24,8 @@ public class Variant : MonoBehaviour
 
     private bool isMoving = false;
 
+    public Clock clock;
+
     void Start()
     {
         rightAnswers = PlayerPrefs.GetInt("RightAnswers", 0);
@@ -104,5 +106,13 @@ public class Variant : MonoBehaviour
         PlayerPrefs.SetFloat("LevelsPosX", targetPos.x);
         PlayerPrefs.Save();
         isMoving = false;
+    }
+
+    private void Update()
+    {
+        if (PlayerPrefs.GetInt("LevelsCount") >= 101)
+        {
+            clock.StopClock();
+        }
     }
 }

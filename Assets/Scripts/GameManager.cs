@@ -9,11 +9,19 @@ public class GameManager : MonoBehaviour
 	public GameObject menu;
 	public bool isSettings = true;
 	public AudioSource click;
+	public Clock clock;
 
-	public void ToStart()
+    public void ToStart()
 	{
 		SceneManager.LoadScene("Questions");
 		click.Play();
+	}
+
+	public void Restart()
+	{
+		PlayerPrefs.DeleteAll();
+		clock.ResetTimer();
+		SceneManager.LoadScene("Questions");
 	}
 
 	public void ToSettings()
